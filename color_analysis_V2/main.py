@@ -2,6 +2,7 @@ import os
 from util import folderTraversal as ft
 from color_recognize import run_recognization as run
 from color_recognize import image_colors_parser as icp
+from color_analysis import run_analysis as ra
 from constant import path_config as path
 
 def process_files(img_folder_path, label_folder_path):
@@ -20,7 +21,9 @@ def process_files(img_folder_path, label_folder_path):
             continue
         try:
             # 調用 color_parse 處理圖片
-            run.RunRecognize.run(img_path, label_path).draw_boxes_and_save()
+            map = run.RunRecognize.run(img_path, label_path).clothes_color_map #.draw_boxes_and_save()
+            ra.RunAnalysis.run(map, path.RESULT_CSV_PATH)
+            #run.RunRecognize.run(img_path, label_path).draw_boxes_and_save()
         except Exception as e:
             print(f"Error processing {img_path} and {label_path}: {e}")
 

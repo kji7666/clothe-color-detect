@@ -12,7 +12,7 @@ class ColorParser:
     '''
     @brief 執行整個顏色偵測流程, 並存為 map : label -> color
     @param image_path : 圖片路徑
-    @param label_path : 標籤路徑
+    @param img_label : 標籤物件
     @param clothes_color_map : 儲存每個標籤偵測的主要顏色
     '''
     def __init__(self, image_path, img_label):
@@ -152,7 +152,7 @@ class ColorParser:
             y1 = max(0, y_center - box_height // 2)
             x2 = min(width, x_center + box_width // 2)
             y2 = min(height, y_center + box_height // 2)
-
+            primary_color = None
             # 從顏色物件中提取主要顏色
             if label.name in self.clothes_color_map:
                 # 偵測到的主要顏色
@@ -168,7 +168,7 @@ class ColorParser:
 
             # 添加標籤文字
             font = cv2.FONT_HERSHEY_SIMPLEX
-            text = f"Label {label.name}"
+            text = f"Label {primary_color}"
             cv2.putText(image, text, (x1, y1 - 10), font, 0.5, color, 1, cv2.LINE_AA)
 
         # 建立輸出檔案路徑
