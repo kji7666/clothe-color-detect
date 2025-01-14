@@ -12,7 +12,7 @@ class RunRecognition:
         image_labels = RunRecognition.parse_label(label_path)
         image_labels.info()
         image_color = icp.ColorPasrser(image_path, image_labels)
-        return image_color.clothes_color_map
+        return image_color
 
     @staticmethod
     def parse_label(label_path):

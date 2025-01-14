@@ -17,7 +17,7 @@ class Label:
         解析並初始化 Label 的屬性
         @params : line (str) - 文件中其中一行的字串
         '''
-        self.name, self.x, self.y, self.w, self.h = self.labelParser(line)
+        self.name, self.x, self.y, self.w, self.h = Label.labelParser(line)
 
     def __str__(self):
         '''
@@ -25,7 +25,8 @@ class Label:
         '''
         return f"Label(name={self.name}, x={self.x:.4f}, y={self.y:.4f}, w={self.w:.4f}, h={self.h:.4f})"
 
-    def __labelParser(line):
+    @staticmethod
+    def labelParser(line):
         '''
         解析一行 YOLOv5 格式的標籤數據
         '''

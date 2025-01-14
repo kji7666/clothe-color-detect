@@ -4,13 +4,13 @@ from sklearn.cluster import KMeans
 from skimage.color import rgb2lab, lab2rgb
 import os
 import cv2
-from costom_object import color
+from costom_object import color as co
 from costom_object import image_labels
 from costom_object import label
 from constant import path_config as path
 class ColorPasrser:
     '''
-    @brief 執行整個顏色偵測流程, 並存為map : label -> color
+    @brief 執行整個顏色偵測流程, 並存為 map : label -> color
     @param image_path : 圖片路徑
     @param label_path : 標籤路徑
     @param clothes_color_map : 儲存每個標籤偵測的主要顏色
@@ -20,8 +20,8 @@ class ColorPasrser:
         self.img_label = img_label
         self.clothes_color_map = {}
 
-        img = self.img_reader()
-        self.handle_img_by_labels(img, img_label)
+        img = self.__img_reader()
+        self.__handle_img_by_labels(img, img_label)
 
     def __img_reader(self):
         '''
@@ -35,8 +35,8 @@ class ColorPasrser:
         @brief 處理圖片中的每個標籤, 對於每個標籤, 裁剪圖片並偵測主要顏色, 存入 clothes_color_map
         '''
         for label in image_labels.label_list:
-            cropped_img = self.img_cropping(image, label)
-            color_obj = self.color_recognition(cropped_img)
+            cropped_img = self.__img_cropping(image, label)
+            color_obj = self.__color_recognition(cropped_img)
             if label.name in self.clothes_color_map:
                 print(f"Warning: Duplicate label {label.name} found!")
             self.clothes_color_map[label.name] = color_obj
@@ -94,7 +94,7 @@ class ColorPasrser:
         color_ratios.sort(key=lambda x: x[1], reverse=True)
 
         # 建立 Color 物件
-        color_obj = color.Color()
+        color_obj = co.Colors()
         for color, ratio in color_ratios:
             color_obj.add_color(tuple(map(int, color)), ratio)  # 將浮點 RGB 轉為整數
 
@@ -138,7 +138,7 @@ class ColorPasrser:
         os.makedirs(output_folder, exist_ok=True)
 
         # 讀取原始圖片
-        image = self.img_reader()
+        image = self.__img_reader()
 
         # 繪製每個標籤的框
         for label in self.img_label.label_list:
