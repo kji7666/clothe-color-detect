@@ -4,11 +4,11 @@ from sklearn.cluster import KMeans
 from skimage.color import rgb2lab, lab2rgb
 import os
 import cv2
-from costom_object import color as co
-from costom_object import image_labels
-from costom_object import label
+from custom_object import color as co
+from custom_object import image_labels
+from custom_object import label
 from constant import path_config as path
-class ColorPasrser:
+class ColorParser:
     '''
     @brief 執行整個顏色偵測流程, 並存為 map : label -> color
     @param image_path : 圖片路徑

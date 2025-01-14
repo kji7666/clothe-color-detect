@@ -1,6 +1,6 @@
-from costom_object import color
-from costom_object import image_labels
-from costom_object import label
+from custom_object import color
+from custom_object import image_labels
+from custom_object import label
 
 class Label:
     '''

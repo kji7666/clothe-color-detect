@@ -1,17 +1,17 @@
-from color_recognization import image_colors_parser as icp
-from costom_object import color 
-from costom_object import image_labels as il
-from costom_object import label as lb
+from color_recognize import image_colors_parser as icp
+from custom_object import color 
+from custom_object import image_labels as il
+from custom_object import label as lb
 from util import file_parser as f
-class RunRecognition:
+class RunRecognize:
     '''
     執行整個流程
     '''
     @staticmethod
     def run(image_path, label_path):
-        image_labels = RunRecognition.parse_label(label_path)
+        image_labels = RunRecognize.parse_label(label_path)
         image_labels.info()
-        image_color = icp.ColorPasrser(image_path, image_labels)
+        image_color = icp.ColorParser(image_path, image_labels)
         return image_color
 
     @staticmethod
