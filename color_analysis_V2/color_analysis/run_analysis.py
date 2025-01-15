@@ -38,7 +38,7 @@ class RunAnalysis:
             writer = csv.writer(csvfile)
 
             # 寫入標籤及顏色資料
-            row = ["NULL"] * 3 # 如果is_same_row=True, 就寫入前一行
+            row = ["NULL"] * 3
             for label_name, colors in label_to_color_map.items():
                 row[label_name] = f'{RunAnalysis.rgb_to_color_name(colors.color_map[0][0])}'
             writer.writerow(row)
@@ -62,7 +62,7 @@ class RunAnalysis:
         @brief 判斷 color1, color2 是否為同色系顏色
         @param color1 (tuple): 第一個 RGB 顏色 (r1, g1, b1)
         @param color2 (tuple): 第二個 RGB 顏色 (r2, g2, b2)
-        @return (bool): 若兩顏色的差異總和小於等於 40，返回 True；否則返回 False
+        @return (bool): 若兩顏色的差異總和小於等於 60, 且 RGB 值各自不相差超過 30, 返回 True, 否則返回 False
         """
         try:
             r1, g1, b1 = color1
@@ -77,40 +77,37 @@ class RunAnalysis:
     def analysis_csv(csv_path = path.RESULT_CSV_PATH):
         '''
         @brief 分析統計存入 csv 檔的顏色組合, 並視覺化數據
+        建立 top_bottom_coat_list (key : (label_0_color, label_1_color, label_2_color), value : 此顏色組合的數量)
+        與 top_bottom_list (key : (label_0_color, label_1_color), value : 此顏色組合的數量)
+        逐行讀入 .cvs
+        格式 : NULL,NULL,"(54, 54, 103)" -> label_0_color, label_1_color, label_2_color
+        if (假如此行只有一個有效(非NULL)value) : continue
+        if (假如此行有兩個有效value 且為label0, label2)  : 存入top_bottom_list
+        if (假如此行有三個有效value) : 存入 top_bottom_coat_dict
         '''
-        # 建立 top_bottom_coat_list (key : (label_0_color, label_1_color, label_2_color), value : 此顏色組合的數量)
-        # 與 top_bottom_list (key : (label_0_color, label_1_color), value : 此顏色組合的數量)
-        # 逐行讀入 cvs, 格式 : NULL,NULL,"(54, 54, 103)" -> label_0_color, label_1_color, label_2_color
-        # 假如此行只有一個有效(非NULL)value則continue
-        # 假如此行有兩個有效value 且為label0, label2 則存入top_bottom_list
-        # 假如此行有三個有效value則存入 top_bottom_coat_dict
+
         top_bottom_coat_dict = {}
         top_bottom_dict = {}
 
         with open(csv_path, mode='r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
-
             for row in reader:
                 try:
                     # 過濾 NULL 並記錄非空值索引
                     valid_values = [(i, literal_eval(val)) for i, val in enumerate(row) if val != "NULL"]
-                    
                     # 若只有一個有效值，跳過
                     if len(valid_values) < 2:
                         continue
-
                     # 若為兩個有效值
                     if len(valid_values) == 2:
                         keys = tuple(val[1] for val in valid_values)
                         top_bottom_dict[keys] = top_bottom_dict.get(keys, 0) + 1
-
                     # 若為三個有效值
                     if len(valid_values) == 3:
                         keys = tuple(val[1] for val in valid_values)
                         top_bottom_coat_dict[keys] = top_bottom_coat_dict.get(keys, 0) + 1
                 except ValueError as e:
                     print(f"Error processing row: {row}, error: {e}")
-
         RunAnalysis.visualize_result(top_bottom_coat_dict, top_bottom_dict)
 
     @staticmethod

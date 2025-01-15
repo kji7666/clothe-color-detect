@@ -133,13 +133,10 @@ class ColorParser:
         '''
         @brief: 在圖片上繪製標籤框，並以偵測到的顏色作為框的顏色，儲存修改後的圖片至指定資料夾, 主要為了確認框的位置與辨識的顏色是否正確
         '''
-
         # 確保資料夾存在
         os.makedirs(output_folder, exist_ok=True)
-
         # 讀取原始圖片
         image = self.__img_reader()
-
         # 繪製每個標籤的框
         for label in self.img_label.label_list:
             # 計算框的頂點座標
@@ -162,18 +159,14 @@ class ColorParser:
             else:
                 # 若沒有偵測到顏色，使用預設顏色
                 color = (255, 255, 255)  # 白色
-
             # 繪製框
             cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
-
             # 添加標籤文字
             font = cv2.FONT_HERSHEY_SIMPLEX
             text = f"Label {primary_color}"
             cv2.putText(image, text, (x1, y1 - 10), font, 0.5, color, 1, cv2.LINE_AA)
-
         # 建立輸出檔案路徑
         output_path = os.path.join(output_folder, os.path.basename(self.image_path))
-
         # 儲存繪製後的圖片
         cv2.imwrite(output_path, image)
         print(f"Image saved with bounding boxes to: {output_path}")
