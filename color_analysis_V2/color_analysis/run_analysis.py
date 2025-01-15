@@ -71,7 +71,7 @@ class RunAnalysis:
             raise ValueError(f"Invalid color format: {color1}, {color2}") from e
 
         diff = abs(r1 - r2) + abs(g1 - g2) + abs(b1 - b2)
-        return diff <= 40
+        return diff <= 60 and abs(r1 - r2) <= 30 and abs(g1 - g2) <= 30 and abs(b1 - b2) <= 30
     
     @staticmethod
     def analysis_csv(csv_path = path.RESULT_CSV_PATH):
@@ -102,8 +102,7 @@ class RunAnalysis:
                     # 若為兩個有效值
                     if len(valid_values) == 2:
                         keys = tuple(val[1] for val in valid_values)
-                        if valid_values[0][0] == 0 and valid_values[1][0] == 2:  # label_0 和 label_2
-                            top_bottom_dict[keys] = top_bottom_dict.get(keys, 0) + 1
+                        top_bottom_dict[keys] = top_bottom_dict.get(keys, 0) + 1
 
                     # 若為三個有效值
                     if len(valid_values) == 3:
@@ -112,12 +111,12 @@ class RunAnalysis:
                 except ValueError as e:
                     print(f"Error processing row: {row}, error: {e}")
 
-        RunAnalysis.visualize_result(top_bottom_coat_dict)
+        RunAnalysis.visualize_result(top_bottom_coat_dict, top_bottom_dict)
 
     @staticmethod
-    def visualize_result(top_bottom_coat_dict, csv_path = path.RESULT_CSV_PATH):
+    def visualize_result(top_bottom_coat_dict, top_bottom_dict, csv_path = path.RESULT_CSV_PATH):
         RunAnalysis.plot_top_combinations_with_coat(RunAnalysis.statistics_top_bottom_coat_combination(top_bottom_coat_dict), top_n=3)
-        # RunAnalysis.plot_top_combinations(RunAnalysis.statistics_top_bottom_combination(top_bottom_coat_dict), top_n=3)
+        RunAnalysis.plot_top_combinations(RunAnalysis.statistics_top_bottom_combination(top_bottom_dict), top_n=3)
         #return top_bottom_coat_dict, top_bottom_dict
     
     @staticmethod
@@ -194,8 +193,6 @@ class RunAnalysis:
 
         # 設定圖表大小，根據行數和列數調整
         plt.figure(figsize=(cols * 3, rows * 3))
-        # 設定整個視窗的標題
-        plt.suptitle("The mainstream colors of tops, bottoms and jackets in the data set", fontsize=16)
 
         # 遍歷前 N 名組合
         for idx, (colors, count) in enumerate(color_combinations[:top_n]):
@@ -231,8 +228,8 @@ class RunAnalysis:
     def statistics_top_bottom_combination(top_bottom_dict):
         """
         因為顏色即使 RGB 值有些許差異，也算是同個色系。
-        對 top_bottom_dict 進行合併統計相似顏色的組合。
-        @param top_bottom_dict (dict): 包含顏色組合及其次數的字典。
+        對 top_bottom_coat_dict 進行合併統計相似顏色的組合。
+        @param top_bottom_coat_dict (dict): 包含顏色組合及其次數的字典。
         @return (list): 合併相似顏色後，按數量排序的列表。
         """
         # 取出所有鍵並轉換為列表以進行遍歷
@@ -241,14 +238,16 @@ class RunAnalysis:
         # 使用集合儲存已合併的鍵
         merged_keys = set()
 
+        # 遍歷所有組合進行比較
         for i in range(len(keys)):
             if keys[i] in merged_keys:
                 continue
 
+            # 確保顏色為有效格式
             try:
                 a_rgb1, a_rgb2 = keys[i]
             except ValueError:
-                raise ValueError(f"Invalid key format in top_bottom_dict: {keys[i]}")
+                raise ValueError(f"Invalid key format in top_bottom_coat_dict: {keys[i]}")
 
             for j in range(i + 1, len(keys)):
                 if keys[j] in merged_keys:
@@ -257,9 +256,11 @@ class RunAnalysis:
                 try:
                     b_rgb1, b_rgb2 = keys[j]
                 except ValueError:
-                    raise ValueError(f"Invalid key format in top_bottom_dict: {keys[j]}")
+                    raise ValueError(f"Invalid key format in top_bottom_coat_dict: {keys[j]}")
 
-                # 檢查兩個 RGB 值是否屬於同一色系
+                b_rgb1, b_rgb2 = keys[j]
+
+                # 檢查三個 RGB 值是否屬於同一色系
                 if (RunAnalysis.is_similar_color(a_rgb1, b_rgb1) and
                     RunAnalysis.is_similar_color(a_rgb2, b_rgb2)):
 
@@ -281,7 +282,7 @@ class RunAnalysis:
     @staticmethod
     def plot_top_combinations(color_combinations, top_n=3):
         """
-        使用 matplotlib 印出前 N 名顏色組合的配色，並以由上到下的兩個圓形表示顏色。
+        使用 matplotlib 印出前 N 名顏色組合的配色，並以由上到下的三個圓形表示顏色。
         自動調整圖表佈局以適應視窗大小。
         @param color_combinations (list): 包含顏色組合和數量的排序列表 [(key, value)]。
         @param top_n (int): 要顯示的前 N 名組合，預設為 3。
@@ -289,15 +290,13 @@ class RunAnalysis:
         # 確保不超出列表長度
         top_n = min(top_n, len(color_combinations))
 
-        # 動態計算行列數：每行最多 2 個組合
-        max_columns = 2
+        # 動態計算行列數：每行最多 3 個組合
+        max_columns = 3
         rows = math.ceil(top_n / max_columns)
         cols = min(max_columns, top_n)
 
         # 設定圖表大小，根據行數和列數調整
         plt.figure(figsize=(cols * 3, rows * 3))
-        # 設定整個視窗的標題
-        plt.suptitle("The mainstream colors of tops and bottoms in the data set", fontsize=16)
 
         # 遍歷前 N 名組合
         for idx, (colors, count) in enumerate(color_combinations[:top_n]):
@@ -305,13 +304,12 @@ class RunAnalysis:
 
             # 確保每組有兩個顏色
             if len(colors) != 2:
-                raise ValueError(f"Expected 2 colors in combination, but got {len(colors)}: {colors}")
+                raise ValueError(f"Expected 3 colors in combination, but got {len(colors)}: {colors}")
 
             # 設置圓形的中心點與半徑
-            centers = [(0.5, 0.7), (0.5, 0.3)]  # 兩個圓的位置
+            centers = [(0.5, 0.8), (0.5, 0.5)]  # 兩個圓的位置
             radius = 0.1
 
-            # 繪製兩個圓形
             for center, color in zip(centers, colors):
                 rgb_color = tuple(int(c) for c in color)  # 確保 RGB 值為整數
                 circle = Circle(center, radius, color=[c / 255.0 for c in rgb_color])

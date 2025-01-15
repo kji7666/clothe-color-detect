@@ -22,7 +22,7 @@ def process_files(img_folder_path, label_folder_path):
         try:
             # 調用 color_parse 處理圖片
             map = run.RunRecognize.run(img_path, label_path).clothes_color_map #.draw_boxes_and_save()
-            ra.RunAnalysis.run(map, path.RESULT_CSV_PATH)
+            ra.RunAnalysis.run_and_save_to_csv(map, path.RESULT_CSV_PATH)
             
             #run.RunRecognize.run(img_path, label_path).draw_boxes_and_save()
         except Exception as e:
@@ -30,5 +30,5 @@ def process_files(img_folder_path, label_folder_path):
 
 def runMain():
     process_files(path.IMAGE_FOLDER_PATH, path.LABEL_FOLDER_PATH)
-    ra.RunAnalysis.visualize_result(path.RESULT_CSV_PATH)
+    ra.RunAnalysis.analysis_csv(path.RESULT_CSV_PATH)
 runMain()
